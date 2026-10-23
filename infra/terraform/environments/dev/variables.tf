@@ -26,3 +26,9 @@ variable "provider_id" {
   type        = string
   default     = "github-provider-v2"
 }
+
+variable "gar_repository" {
+  description = "ID do repositório Docker no Artifact Registry"
+  type        = string
+  default     = "comments-repo"
+}

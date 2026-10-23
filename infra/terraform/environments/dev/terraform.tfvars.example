@@ -3,3 +3,5 @@ region      = "us-central1"
 environment = "dev"
 # Obrigatório: owner/repo do GitHub onde a Actions CD vai rodar (OIDC)
 github_repo = "seu-usuario/seu-repositorio"
+# Repositório Docker (criado pelo Terraform; variable GAR_REPOSITORY no GitHub)
+gar_repository = "comments-repo"

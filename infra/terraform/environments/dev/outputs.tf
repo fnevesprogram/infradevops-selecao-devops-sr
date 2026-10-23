@@ -37,3 +37,13 @@ output "github_actions_sa_email" {
   description = "Service Account do GitHub Actions"
   value       = module.workload_identity_federation.service_account_email
 }
+
+output "artifact_registry_repository" {
+  description = "ID do repositório Docker no Artifact Registry"
+  value       = module.artifact_registry.repository_id
+}
+
+output "artifact_registry_url" {
+  description = "URL base das imagens (região-docker.pkg.dev/project/repo)"
+  value       = module.artifact_registry.repository_url
+}

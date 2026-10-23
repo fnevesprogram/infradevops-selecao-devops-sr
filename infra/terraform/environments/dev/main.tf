@@ -86,15 +86,24 @@ module "secrets" {
   accessor_member = "" # ESO GSA já possui roles/secretmanager.secretAccessor no projeto
 }
 
-# 5. Módulo Workload Identity Federation (Autenticação keyless para GitHub Actions OIDC)
+# 5. Artifact Registry (repositório Docker criado pela IaC — CD só faz push)
+module "artifact_registry" {
+  source        = "../../modules/artifact_registry"
+  project_id    = var.project_id
+  region        = var.region
+  repository_id = var.gar_repository
+}
+
+# 6. Módulo Workload Identity Federation (Autenticação keyless para GitHub Actions OIDC)
 module "workload_identity_federation" {
   source      = "../../modules/workload_identity_federation"
   project_id  = var.project_id
   github_repo = var.github_repo
   provider_id = var.provider_id
+  pool_id     = "dev-comments-pool-v2"
 }
 
-# 6. Módulo External Secrets Operator (Operador de plataforma, CRDs e Workload Identity)
+# 7. Módulo External Secrets Operator (Operador de plataforma, CRDs e Workload Identity)
 module "external_secrets" {
   source     = "../../modules/external_secrets"
   project_id = var.project_id

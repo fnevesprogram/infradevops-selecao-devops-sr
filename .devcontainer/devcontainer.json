@@ -1,0 +1,66 @@
+{
+  "name": "DevOps Sênior Workspace",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+    "--network=host"
+  ],
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "forwardPorts": [
+    8000,
+    3000,
+    9090,
+    5432
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "Comments API",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Grafana Dashboard",
+      "onAutoForward": "notify"
+    },
+    "9090": {
+      "label": "Prometheus Server",
+      "onAutoForward": "silent"
+    },
+    "5432": {
+      "label": "PostgreSQL Database",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/app/.venv/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": [
+          "app/tests"
+        ],
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform",
+          "editor.formatOnSave": true
+        },
+        "[yaml]": {
+          "editor.defaultFormatter": "redhat.vscode-yaml",
+          "editor.formatOnSave": true
+        }
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "hashicorp.terraform",
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "bridgecrewio.checkov"
+      ]
+    }
+  },
+  "postCreateCommand": "python3 -m venv app/.venv && app/.venv/bin/pip install --upgrade pip && app/.venv/bin/pip install -r app/requirements.txt",
+  "remoteUser": "vscode"
+}

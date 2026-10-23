@@ -39,12 +39,11 @@ resource "google_service_account_iam_member" "workload_identity_user" {
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
 }
 
-# Permissões mínimas para deploy no GKE e push de imagem
+# Permissões mínimas: deploy no GKE + push de imagem (repo criado pelo Terraform)
 resource "google_project_iam_member" "ci_cd_roles" {
   for_each = toset([
     "roles/container.developer",
     "roles/artifactregistry.writer",
-    "roles/artifactregistry.repoAdmin", # cria/garante o repositório Docker na esteira CD
   ])
   project = var.project_id
   role    = each.key

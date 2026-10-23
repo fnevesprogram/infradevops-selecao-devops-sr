@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Pytest
         env:
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           PYTHONPATH: .
         run: pytest -q app/tests
 
