@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: comments-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: comments
+    # Porta do host omitida de propósito: evita conflito com Postgres local.
+    # Acesso interno: postgres:5432 na rede comments-net.
+    # Para depurar do host: docker compose exec postgres psql -U postgres -d comments
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d comments" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - comments-net
+
+  api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: comments-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/comments
+      PORT: 8000
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - comments-net
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: comments-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./ops/alerts:/etc/prometheus/alerts:ro
+    depends_on:
+      - api
+    networks:
+      - comments-net
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: comments-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3001:3000"  # 3001 no host se 3000 já estiver ocupada
+    volumes:
+      - ./ops/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./ops/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./ops/grafana/comments-api.json:/var/lib/grafana/dashboards/comments-api.json:ro
+    depends_on:
+      - prometheus
+    networks:
+      - comments-net
+
+volumes:
+  pgdata:
+
+networks:
+  comments-net:
+    driver: bridge

@@ -1,0 +1,5 @@
+project_id  = "seu-projeto-gcp"
+region      = "us-central1"
+environment = "dev"
+# Obrigatório: owner/repo do GitHub onde a Actions CD vai rodar (OIDC)
+github_repo = "seu-usuario/seu-repositorio"

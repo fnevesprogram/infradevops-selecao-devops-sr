@@ -1,0 +1,17 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: comments-api
+  namespace: comments
+  labels:
+    app.kubernetes.io/name: comments-api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Com HPA minReplicas=2, garante ao menos 1 pod durante disrupções voluntárias
+  # (drain de nó, upgrade Autopilot, rolling eviction).
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: comments-api
+      app.kubernetes.io/component: api

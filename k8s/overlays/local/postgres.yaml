@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-postgres
+  namespace: comments
+  labels:
+    app.kubernetes.io/name: comments-postgres
+    app.kubernetes.io/component: database
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  selector:
+    app.kubernetes.io/name: comments-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-postgres
+  namespace: comments
+  labels:
+    app.kubernetes.io/name: comments-postgres
+    app.kubernetes.io/component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: comments-postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: comments-postgres
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: comments
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "comments"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

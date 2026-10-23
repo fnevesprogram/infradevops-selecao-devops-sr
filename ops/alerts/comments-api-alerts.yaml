@@ -1,0 +1,51 @@
+groups:
+  - name: comments-api-alerts
+    rules:
+      - alert: CommentsAPIDown
+        expr: up{job="comments-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: comments-api
+        annotations:
+          summary: "Instância da Comments API inacessível"
+          description: "O job de scrape da Comments API está reportando down há mais de 30 segundos."
+
+      - alert: CommentsAPIHigh5xxErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="comments-api",status=~"5.."}[2m]))
+            /
+            sum(rate(http_requests_total{job="comments-api"}[2m]))
+          ) * 100 > 1
+        for: 1m
+        labels:
+          severity: critical
+          service: comments-api
+        annotations:
+          summary: "Taxa de erro 5xx elevada na Comments API"
+          description: "A taxa de erros HTTP 5xx ultrapassou o SLO de 1% nos últimos 2 minutos."
+
+      - alert: CommentsAPIHighLatencyP95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="comments-api"}[2m])) by (le)
+          ) > 0.2
+        for: 1m
+        labels:
+          severity: warning
+          service: comments-api
+        annotations:
+          summary: "Latência p95 superior ao SLO"
+          description: "A latência p95 da Comments API está acima de 200ms por mais de 1 minuto."
+
+      - alert: CommentsAPIDatabaseDisconnected
+        expr: probe_success{job="comments-api"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: comments-api
+        annotations:
+          summary: "Falha de conectividade com o banco de dados"
+          description: "O healthcheck da Comments API reportou perda de conexão com o PostgreSQL."

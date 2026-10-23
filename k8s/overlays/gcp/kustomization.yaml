@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: comments
+
+resources:
+  - ../../base
+  - externalsecret.yaml
+
+# Placeholders substituídos no deploy (CI/CD / script) — sem kustomize CLI.
+# ClusterSecretStore (cluster-scoped) é aplicado à parte.
+images:
+  - name: comments-api
+    newName: __IMAGE_REPO__
+    newTag: __IMAGE_TAG__
