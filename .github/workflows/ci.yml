@@ -78,15 +78,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Scan image
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          image-ref: comments-api:scan
-          format: table
-          exit-code: "0"
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL,HIGH
+      # Evita aquasecurity/trivy-action + setup-trivy (download do binário falha no runner)
+      - name: Scan image with Trivy (Docker)
+        run: ./ops/scripts/ci/trivy-scan-image.sh comments-api:scan
 
   checkov:
     name: Checkov
