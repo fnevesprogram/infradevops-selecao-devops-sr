@@ -30,7 +30,9 @@ for f in kustomization.yaml clustersecretstore.yaml externalsecret.yaml; do
     "ci-validation-project" \
     "dev-comments-db-url" \
     "example.com/comments-api" \
-    "ci"
+    "ci" \
+    "us-central1" \
+    "dev-comments-gke"
 done
 
 kubectl kustomize "${OVERLAY}" > "${OUT_DIR}/gcp.yaml"

@@ -22,7 +22,12 @@ logger = logging.getLogger("comments_api")
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    logger.info("Starting up %s v%s", settings.app_name, settings.app_version)
+    logger.info(
+        "Starting up %s v%s (database_ssl=%s)",
+        settings.app_name,
+        settings.app_version,
+        settings.database_ssl,
+    )
     try:
         await init_db()
     except Exception:

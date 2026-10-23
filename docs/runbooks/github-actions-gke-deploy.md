@@ -14,14 +14,14 @@ push main / workflow_dispatch
         ▼
  GitHub Actions (OIDC → GCP WIF)
         │
-        ├── docker buildx → Artifact Registry
-        ├── gcloud get-credentials (GKE Autopilot)
-        ├── ops/scripts/deploy-gcp-kustomize.sh
-        └── ops/scripts/cd/verify-deploy.sh
+        ├── docker build + push → Artifact Registry
+        ├── get-gke-credentials (GKE Autopilot)
+        ├── deploy-gcp-kustomize.sh  (kubectl apply -k, análogo ao helm upgrade --wait)
+        └── kubectl rollout status
 ```
 
-> A esteira **não instala** o binário `kustomize`; usa o Kustomize embutido no `kubectl`.  
-> YAML dos workflows fica fino: lógica em `ops/scripts/ci/*` e `ops/scripts/cd/*`.
+> Mesmo padrão da esteira de referência (auth → build/push → credentials → deploy → verify).  
+> Em vez de Helm, usa **Kustomize** embutido no `kubectl` (`ops/scripts/deploy-gcp-kustomize.sh`).
 
 ---
 
@@ -202,6 +202,8 @@ curl -s http://localhost:8080/health/ready
 | `Permission denied` Artifact Registry | SA sem roles | Reaplicar módulo WIF (writer + repoAdmin) |
 | `ExternalSecret` / CRD not found | ESO não instalado | `terraform apply` (módulo `external_secrets`) |
 | `no matches for kind ClusterSecretStore in version external-secrets.io/v1` | Manifests em `v1` com ESO &lt; 0.16 | Usar `external-secrets.io/v1beta1` (chart 0.14.x) ou upgrade do chart para ≥ 0.16 |
+| Rollout timeout + `BinaryAuthorization` / `ImagePolicyWebhook` | BinAuth ENFORCE sem attestors | `terraform apply` (gke) ou `./ops/scripts/cd/fix-cluster-prereqs.sh` |
+| Rollout timeout + logs `Database health check failed` / SSL | Cloud SQL `ENCRYPTED_ONLY` | `terraform apply` (cloudsql → `ALLOW_UNENCRYPTED_AND_ENCRYPTED`) + `DATABASE_SSL` no overlay |
 | Pods não ficam Ready | Secret DB / SQL | `kubectl describe externalsecret -n comments`; checar Cloud SQL |
 | Workflow não aparece | YAML fora de `.github/workflows` ou branch errada | Confirmar arquivo no `main` |
 

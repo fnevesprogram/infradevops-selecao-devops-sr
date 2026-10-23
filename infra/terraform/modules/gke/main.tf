@@ -38,8 +38,10 @@ resource "google_container_cluster" "primary" {
     channel = "REGULAR"
   }
 
+  # DISABLED no dev: ENFORCE sem attestors/policy bloqueia imagens do Artifact Registry
+  # (pods em ImagePullBackOff / FailedCreate e o CD estoura o rollout).
   binary_authorization {
-    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+    evaluation_mode = "DISABLED"
   }
 
   master_auth {

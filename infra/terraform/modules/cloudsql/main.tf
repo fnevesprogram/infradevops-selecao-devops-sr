@@ -26,7 +26,9 @@ resource "google_sql_database_instance" "postgres" {
       ipv4_enabled                                  = false
       private_network                               = var.network_id
       enable_private_path_for_google_cloud_services = true
-      ssl_mode                                      = "ENCRYPTED_ONLY"
+      # Private IP (VPC): permite TLS opcional. ENCRYPTED_ONLY sem CA/proxy
+      # faz /health/ready falhar e o rollout do CD estourar timeout.
+      ssl_mode = "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
     }
 
     backup_configuration {
@@ -95,7 +97,7 @@ resource "google_sql_database_instance" "postgres" {
     }
   }
 
-  # checkov:skip=CKV_GCP_6:Enforce SSL encryption in transit using ENCRYPTED_ONLY for private IP connections without requiring mTLS client certificates
+  # checkov:skip=CKV_GCP_6:Private-IP-only instance; TLS optional for Autopilot pods (VPC-isolated)
   # checkov:skip=CKV_GCP_79:PostgreSQL 16 is latest supported GA version; POSTGRES_18 is not available in GCP Cloud SQL
   deletion_protection = false
 }

@@ -34,12 +34,16 @@ replace_gcp_placeholders() {
   local secret_key="$3"
   local image_repo="$4"
   local image_tag="$5"
+  local cluster_location="${6:-}"
+  local cluster_name="${7:-}"
 
   sed -i.bak \
     -e "s|__GCP_PROJECT_ID__|${project_id}|g" \
     -e "s|__SECRET_REMOTE_KEY__|${secret_key}|g" \
     -e "s|__IMAGE_REPO__|${image_repo}|g" \
     -e "s|__IMAGE_TAG__|${image_tag}|g" \
+    -e "s|__CLUSTER_LOCATION__|${cluster_location}|g" \
+    -e "s|__CLUSTER_NAME__|${cluster_name}|g" \
     "${file}"
   rm -f "${file}.bak"
 }
