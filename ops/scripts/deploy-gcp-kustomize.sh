@@ -40,6 +40,15 @@ kubectl kustomize "${OVERLAY}" > "${WORKDIR}/rendered.yaml"
 grep -q "kind: Deployment" "${WORKDIR}/rendered.yaml" || die "Render sem Deployment"
 grep -q "kind: PodDisruptionBudget" "${WORKDIR}/rendered.yaml" || die "Render sem PDB"
 
+log "Aguardando CRDs do External Secrets Operator"
+if ! kubectl get crd clustersecretstores.external-secrets.io >/dev/null 2>&1; then
+  die "CRD ClusterSecretStore ausente. Rode terraform apply (módulo external_secrets) antes do CD."
+fi
+kubectl wait --for=condition=Established \
+  crd/clustersecretstores.external-secrets.io \
+  crd/externalsecrets.external-secrets.io \
+  --timeout=120s
+
 log "Apply ClusterSecretStore"
 kubectl apply -f "${OVERLAY}/clustersecretstore.yaml"
 

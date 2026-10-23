@@ -201,6 +201,7 @@ curl -s http://localhost:8080/health/ready
 | `Unable to exchange token` / OIDC denied | `github_repo` no Terraform ≠ repo atual | Ajustar `terraform.tfvars` e `terraform apply` |
 | `Permission denied` Artifact Registry | SA sem roles | Reaplicar módulo WIF (writer + repoAdmin) |
 | `ExternalSecret` / CRD not found | ESO não instalado | `terraform apply` (módulo `external_secrets`) |
+| `no matches for kind ClusterSecretStore in version external-secrets.io/v1` | Manifests em `v1` com ESO &lt; 0.16 | Usar `external-secrets.io/v1beta1` (chart 0.14.x) ou upgrade do chart para ≥ 0.16 |
 | Pods não ficam Ready | Secret DB / SQL | `kubectl describe externalsecret -n comments`; checar Cloud SQL |
 | Workflow não aparece | YAML fora de `.github/workflows` ou branch errada | Confirmar arquivo no `main` |
 
