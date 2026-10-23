@@ -9,7 +9,7 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 require_cmd kubectl
 
 NAMESPACE="${NAMESPACE:-comments}"
-TIMEOUT="${ROLLOUT_TIMEOUT:-5m}"
+TIMEOUT="${ROLLOUT_TIMEOUT:-10m}"
 
 log "Aguardando rollout"
 kubectl rollout status "deployment/comments-api" -n "${NAMESPACE}" --timeout="${TIMEOUT}"

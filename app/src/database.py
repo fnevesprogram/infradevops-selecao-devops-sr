@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import ssl
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -19,7 +20,6 @@ from app.src.models import Base
 
 logger = logging.getLogger(__name__)
 
-_POSTGRES_PREFIXES = ("postgres://", "postgresql://")
 _ASYNCPG_PREFIX = "postgresql+asyncpg://"
 
 
@@ -34,10 +34,26 @@ def normalize_database_url(url: str) -> str:
     return url
 
 
-def _engine_kwargs(database_url: str, *, debug: bool) -> dict[str, Any]:
+def _cloudsql_ssl_context() -> ssl.SSLContext:
+    """TLS para Cloud SQL via IP privado (cert hostname ≠ IP)."""
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
+
+
+def _engine_kwargs(
+    database_url: str,
+    *,
+    debug: bool,
+    use_ssl: bool,
+) -> dict[str, Any]:
     kwargs: dict[str, Any] = {"echo": debug, "pool_pre_ping": True}
     if not database_url.startswith("sqlite"):
         kwargs.update(pool_size=10, max_overflow=20, pool_recycle=1800)
+        if use_ssl:
+            # Cloud SQL ssl_mode=ENCRYPTED_ONLY exige TLS no cliente
+            kwargs["connect_args"] = {"ssl": _cloudsql_ssl_context()}
     return kwargs
 
 
@@ -45,12 +61,17 @@ def build_engine(
     database_url: str | None = None,
     *,
     debug: bool | None = None,
+    use_ssl: bool | None = None,
 ) -> AsyncEngine:
     """Factory do AsyncEngine."""
     url = normalize_database_url(database_url or settings.database_url)
     return create_async_engine(
         url,
-        **_engine_kwargs(url, debug=settings.debug if debug is None else debug),
+        **_engine_kwargs(
+            url,
+            debug=settings.debug if debug is None else debug,
+            use_ssl=settings.database_ssl if use_ssl is None else use_ssl,
+        ),
     )
 
 

@@ -43,5 +43,6 @@ done
 for kind in Deployment PodDisruptionBudget ExternalSecret HorizontalPodAutoscaler; do
   grep -q "kind: ${kind}" "${OUT_DIR}/gcp.yaml" || die "Overlay gcp sem ${kind}"
 done
+grep -q 'DATABASE_SSL: "true"' "${OUT_DIR}/gcp.yaml" || die "Overlay gcp sem DATABASE_SSL"
 
 log "Manifests OK (base, local, gcp)"

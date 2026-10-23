@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     database_url: str = "sqlite+aiosqlite:///:memory:"
+    # Cloud SQL (ssl_mode=ENCRYPTED_ONLY): ative no overlay GCP via ConfigMap.
+    database_ssl: bool = False
     log_level: str = "INFO"
 
     @property

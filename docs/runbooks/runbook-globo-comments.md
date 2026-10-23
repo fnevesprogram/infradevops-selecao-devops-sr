@@ -84,6 +84,8 @@ kubectl get secret comments-api-db-secret -n comments
 
 Se a Secret não existir ou o ExternalSecret estiver em erro: revisar ESO, Workload Identity e Secret Manager (`dev-comments-db-url`).
 
+Confirme `DATABASE_SSL=true` no ConfigMap (Cloud SQL usa `ssl_mode=ENCRYPTED_ONLY` — sem TLS o `/health/ready` fica 503 e o rollout falha).
+
 ### 4.4 Conectividade com Cloud SQL
 
 ```bash

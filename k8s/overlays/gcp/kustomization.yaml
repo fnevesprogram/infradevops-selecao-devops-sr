@@ -7,6 +7,9 @@ resources:
   - ../../base
   - externalsecret.yaml
 
+patches:
+  - path: configmap-patch.yaml
+
 # Placeholders substituídos no deploy (CI/CD / script) — sem kustomize CLI.
 # ClusterSecretStore (cluster-scoped) é aplicado à parte.
 images:
