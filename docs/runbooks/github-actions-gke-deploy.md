@@ -20,7 +20,6 @@ push main / workflow_dispatch
         └── kubectl rollout status
 ```
 
-> Mesmo padrão da esteira de referência (auth → build/push → credentials → deploy → verify).  
 > Em vez de Helm, usa **Kustomize** embutido no `kubectl` (`ops/scripts/deploy-gcp-kustomize.sh`).
 
 ---
@@ -203,6 +202,7 @@ curl -s http://localhost:8080/health/ready
 | `ExternalSecret` / CRD not found | ESO não instalado | `terraform apply` (módulo `external_secrets`) |
 | `no matches for kind ClusterSecretStore in version external-secrets.io/v1` | Manifests em `v1` com ESO &lt; 0.16 | Usar `external-secrets.io/v1beta1` (chart 0.14.x) ou upgrade do chart para ≥ 0.16 |
 | Rollout timeout + `BinaryAuthorization` / `ImagePolicyWebhook` | BinAuth ENFORCE sem attestors | `terraform apply` (gke) ou `./ops/scripts/cd/fix-cluster-prereqs.sh` |
+| `ImagePullBackOff` | Nó Autopilot sem `artifactregistry.reader` e/ou BinAuth | `./ops/scripts/cd/fix-cluster-prereqs.sh` + `terraform apply` (artifact_registry + gke) |
 | Rollout timeout + logs `Database health check failed` / SSL | Cloud SQL `ENCRYPTED_ONLY` | `terraform apply` (cloudsql → `ALLOW_UNENCRYPTED_AND_ENCRYPTED`) + `DATABASE_SSL` no overlay |
 | Pods não ficam Ready | Secret DB / SQL | `kubectl describe externalsecret -n comments`; checar Cloud SQL |
 | Workflow não aparece | YAML fora de `.github/workflows` ou branch errada | Confirmar arquivo no `main` |
