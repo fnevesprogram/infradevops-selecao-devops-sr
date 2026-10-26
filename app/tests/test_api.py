@@ -1,4 +1,4 @@
-"""Testes de integração HTTP da Comments API."""
+"""Testes de integração HTTP da Globo Comments API."""
 
 from __future__ import annotations
 
